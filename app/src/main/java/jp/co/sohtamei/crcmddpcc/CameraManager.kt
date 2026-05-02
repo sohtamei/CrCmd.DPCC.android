@@ -25,6 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicInteger
+import android.util.Log
 
 class CameraManager(private val context: Context) {
     private class IntRef(var value: Int)
@@ -601,17 +602,17 @@ class CameraManager(private val context: Context) {
 
     private fun readContainer(conn: UsbDeviceConnection, ep: UsbEndpoint): ByteArray? {
         val packet = ByteArray(ep.maxPacketSize.coerceAtLeast(512))
-        val firstRead = conn.bulkTransfer(ep, packet, packet.size, 5000)
-        if (firstRead <= 0) return null
-        if (firstRead < 4) return packet.copyOf(firstRead)
+        var readNum = conn.bulkTransfer(ep, packet, packet.size, 5000)
+        if (readNum <= 0) return null
+        if (readNum < 4) return packet.copyOf(readNum)
         val expected = PtpParser.readUInt32LE(packet, 0).toInt()
         val output = ByteArray(expected)
-        System.arraycopy(packet, 0, output, 0, minOf(firstRead, expected))
-        var copied = firstRead
-        while (copied < expected) {
-            val n = conn.bulkTransfer(ep, output, copied, expected - copied, 5000)
-            if (n <= 0) break
-            copied += n
+        System.arraycopy(packet, 0, output, 0, minOf(readNum, expected))
+        var copied = readNum
+        while ((readNum % 512) == 0) {
+            readNum = conn.bulkTransfer(ep, output, copied, expected - copied, 5000)
+            if (readNum <= 0) break
+            copied += readNum
         }
         return output.copyOf(minOf(copied, expected))
     }
