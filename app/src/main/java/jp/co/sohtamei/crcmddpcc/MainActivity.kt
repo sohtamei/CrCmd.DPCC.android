@@ -33,6 +33,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,18 +43,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.yield
 
 class MainActivity : ComponentActivity() {
     private val vm: CameraViewModel by viewModels()
@@ -88,9 +93,7 @@ private fun AppRoot(vm: CameraViewModel) {
 @Composable
 private fun EulaScreen(onAccept: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text("EULA", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
@@ -120,6 +123,20 @@ private fun ContentScreen(vm: CameraViewModel) {
         "500E (Exposure_Program_Mode)",
     )
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(
+        vm.logLines.size,
+        vm.isLiveview,
+        vm.jpegBitmap != null,
+        vm.dpParams
+    ) {
+        if (vm.logLines.isNotEmpty()) {
+            yield()
+            listState.scrollToItem(vm.logLines.lastIndex)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -127,7 +144,10 @@ private fun ContentScreen(vm: CameraViewModel) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                modifier = Modifier.padding(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text("Camera - DP,CC")
 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -146,7 +166,7 @@ private fun ContentScreen(vm: CameraViewModel) {
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("LiveView")
+                    Text("LiveView", fontSize = 13.sp)
                     Switch(checked = vm.isLiveview, onCheckedChange = { vm.toggleLiveview() }, enabled = vm.cameraStatus == "connected")
                     TextButton(onClick = vm::listcc, enabled = vm.cameraStatus == "connected") { Text("listCC") }
                     TextButton(onClick = vm::setupCamera, enabled = vm.cameraStatus == "connected") { Text("setup") }
@@ -172,17 +192,20 @@ private fun ContentScreen(vm: CameraViewModel) {
                 }
 
                 var expanded by remember { mutableStateOf(false) }
-                OutlinedTextField(
-                    value = vm.codeHex,
-                    onValueChange = { vm.codeHex = it.uppercase() },
-                    label = { Text("code 0x") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
-                    keyboardActions = KeyboardActions(onDone = { vm.updateDpcc(); expanded = false }),
-                    singleLine = true,
-                )
-                Text(vm.describeDpcc(vm.codeHex))
-                TextButton(onClick = { expanded = !expanded }) { Text(if (expanded) "hide candidates" else "show candidates") }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+	                OutlinedTextField(
+	                    value = vm.codeHex,
+	                    onValueChange = { vm.codeHex = it.uppercase() },
+	                    label = { Text("code 0x") },
+	                    modifier = Modifier.width(80.dp),
+	                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
+	                    keyboardActions = KeyboardActions(onDone = { vm.updateDpcc(); expanded = false }),
+	                    singleLine = true,
+	                    textStyle = TextStyle(fontSize = 13.sp)
+	                )
+	                Text(vm.describeDpcc(vm.codeHex), fontSize = 13.sp)
+	                TextButton(onClick = { expanded = !expanded }) { Text(if (expanded) "hide candidates" else "candidates") }
+				}
                 if (expanded) {
                     Column(modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))) {
                         candidates.forEachIndexed { index, item ->
@@ -205,9 +228,10 @@ private fun ContentScreen(vm: CameraViewModel) {
                 OutlinedTextField(
                     value = vm.dpParams,
                     onValueChange = {},
-                    label = { Text("DP/CC") },
+                    label = { Text("Param") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 4,
+                    textStyle = TextStyle(fontSize = 13.sp)
                 )
 
                 if (vm.cameraStatus == "connected" && vm.modeInput != ModeInput.Disabled) {
@@ -222,9 +246,13 @@ private fun ContentScreen(vm: CameraViewModel) {
                             TextButton(onClick = { vm.setCc(2) }) { Text("set(2)") }
                             TextButton(onClick = { vm.setCc(1) }) { Text("set(1)") }
                         }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(value = vm.dpSetVal, onValueChange = { vm.dpSetVal = it }, label = { Text("value") }, modifier = Modifier.width(140.dp), singleLine = true)
+                        OutlinedTextField(
+                            value = vm.dpSetVal,
+                            onValueChange = { vm.dpSetVal = it },
+                            modifier = Modifier.width(90.dp),
+                            singleLine = true,
+		                    textStyle = TextStyle(fontSize = 13.sp)
+                        )
                         TextButton(onClick = vm::setDpcc) { Text("set") }
                     }
                 }
@@ -232,14 +260,19 @@ private fun ContentScreen(vm: CameraViewModel) {
         }
 
         Card(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(12.dp).fillMaxSize()) {
                 Text("Log", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(8.dp))
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    items(vm.logLines) { line -> Text(line, style = MaterialTheme.typography.bodySmall) }
+                Spacer(Modifier.height(4.dp))
+
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    itemsIndexed(vm.logLines) { _, line ->
+                        Text(line, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
     }
 }
-

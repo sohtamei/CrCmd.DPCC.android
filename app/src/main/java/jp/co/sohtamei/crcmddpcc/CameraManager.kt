@@ -26,6 +26,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicInteger
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 class CameraManager(private val context: Context) {
     private class IntRef(var value: Int)
@@ -121,16 +122,12 @@ class CameraManager(private val context: Context) {
             addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            appContext.registerReceiver(
-                receiver,
-                filter,
-                Context.RECEIVER_NOT_EXPORTED
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            appContext.registerReceiver(receiver, filter)
-        }
+        ContextCompat.registerReceiver(
+            appContext,
+            receiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
 
         receiverRegistered = true
     }
@@ -256,7 +253,9 @@ class CameraManager(private val context: Context) {
                 setDPCC(PTP_CC.S1_Button.raw, 2)
                 performCaptureSequence()
             } else {
-                setDPCC(PTP_CC.S1_Button.raw, 2) && waitForFocusIndication() && performCaptureSequence()
+                setDPCC(PTP_CC.S1_Button.raw, 2)
+                && waitForFocusIndication()
+                && performCaptureSequence()
             }
             mainHandler.post { completion?.invoke(ok) }
         }

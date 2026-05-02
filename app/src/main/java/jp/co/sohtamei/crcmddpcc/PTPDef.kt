@@ -42,6 +42,7 @@ enum class ModeInput {
 val ccParams: MutableList<Param> = mutableListOf(
   //Param(\1, \2, PTP_DT.\3, formflag = Formflag.\4, enums = mutableListOf(\5)),
   //Param\(pcode:(.*), cc_dp:(.*), datatype:\.(.*), formflag:\.(.*), enums:\[(.*)\]\),
+    Param(0xD2C1, true, PTP_DT.UINT16, formflag = Formflag.Enum, enums = mutableListOf(1L,2L)),
     Param(0xD2C2, true, PTP_DT.UINT16, formflag = Formflag.Enum, enums = mutableListOf(1L,2L)),
     Param(0xD2C3, true, PTP_DT.UINT16, formflag = Formflag.Enum, enums = mutableListOf(1L,2L)),
     Param(0xD2C8, true, PTP_DT.UINT16, formflag = Formflag.Enum, enums = mutableListOf(1L,2L)),
