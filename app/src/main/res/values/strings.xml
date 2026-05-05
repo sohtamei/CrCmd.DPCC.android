@@ -1,0 +1,4 @@
+<resources>
+    <string name="eula_title">EULA</string>
+    <string name="eula">Using this app to control a Sony camera, the camera will be out of Sony manufacturer-warranty.\nPlease use this app only if you understand and accept this condition.\n\nThis app uses Sony’s Camera Remote Command library and was developed by Sohta-Mei.\nThe above terms are based on the Sony Library Terms of Use.\nAdditionally, this app cannot be used for critical applications such as life-support systems or military purposes.\nSohta-Mei and Sony shall not be liable for any damage, including camera malfunction or failure, caused by the use of this app.</string>
+</resources>
