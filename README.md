@@ -1,14 +1,14 @@
 # CrCmd.DPCC.android
 
-A test tool for Sony cameras that lets you control your camera via USB.
-
+A test tool for Sony cameras that lets you control your camera via USB.  
 This is a test tool for Sony cameras that allows you to connect a camera to your smartphone via USB and control it.
 
-<img src="doc/IMG_1160s.PNG" height="540"> <video src="https://raw.githubusercontent.com/sohtamei/CrCmd.DPCC.ios/main/doc/CrCmd.DPCC.mp4" controls height="540"></video>
+<img src="doc/IMG_1160s.PNG" height="540">.  
+<a href=https://youtube.com/shorts/OTB9BZ0vInU>Link to play the demo video.</a>
 
 ## About This Tool
 
-CrCommand (Camera Remote Command) is Sony's PTP protocol for alpha cameras.
+CrCommand (Camera Remote Command) is Sony's PTP protocol for alpha cameras.  
 This app can be used as both a development tool and a sample implementation for apps built with CrCommand.
 
 The source code for this app is available on GitHub. Please use it as a reference and try developing your own iOS/android camera app.
@@ -17,8 +17,8 @@ The source code for this app is available on GitHub. Please use it as a referenc
 
 **Using this app to control a Sony camera may void the manufacturer's warranty.**
 
-This app must not be used for critical applications such as life-support systems or for military purposes.
-These restrictions are based on the terms and conditions of Sony's library license agreement.
+This app must not be used for critical applications such as life-support systems or for military purposes.  
+These restrictions are based on the terms and conditions of Sony's library license agreement.  
 SohtaMei and Sony shall not be liable for any damage, including camera malfunction or failure, caused by the use of this app.
 
 - Sony license agreement: [https://support.d-imaging.sony.co.jp/app/cameraremotecommand/licenseagreement/index.html](https://support.d-imaging.sony.co.jp/app/cameraremotecommand/licenseagreement/index.html)
@@ -58,7 +58,7 @@ Please download [app-release.apk](https://github.com/sohtamei/CrCmd.DPCC.android
 
 ## Privacy Policy
 
-This app does not collect users' personal information.
+- This app does not collect users' personal information.
 
 ## Contact
 
